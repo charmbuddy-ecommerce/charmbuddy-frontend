@@ -1,16 +1,40 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import localFont from 'next/font/local';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// Font custom  
+const fanlste = localFont({
+  src: [
+    {
+      path: './fonts/fanlste.woff2',
+      weight: '400',
+      style: 'normal',
+    },  
+    {
+      path: './fonts/fanlste_Italic.woff2',
+      weight: '400',
+      style: 'italic',
+    },
+  ],
+  variable: '--font-fanlste',
+})
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// Font custom  
+const satoshi = localFont({
+  src: [
+    {
+      path: './fonts/Satoshi-Variable.woff2',
+      weight: '400',
+      style: 'normal',
+    },  
+    {
+      path: './fonts/Satoshi-VariableItalic.woff2',
+      weight: '400',
+      style: 'italic',
+    },
+  ],
+  variable: '--font-satoshi',
+})
 
 export const metadata: Metadata = {
   title: "Charmbuddy",
@@ -24,9 +48,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      {/* 1. satoshi.className -> Menjadikan Satoshi font default website.
+         2. fanlste.variable -> Mendaftarkan variabel CSS --font-fanlste agar bisa dibaca Tailwind.
+      */}
+      <body className={`${satoshi.className} ${fanlste.variable} antialiased`}>
         {children}
       </body>
     </html>

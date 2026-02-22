@@ -1,3 +1,5 @@
+// Ini buat Homepage, di localhost/
+
 import ProductCarousel from "@/components/ProductCarousel";
 
 export default function Home() {
