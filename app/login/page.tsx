@@ -23,7 +23,6 @@ export default function LoginPage() {
     setErrorMessage('');
     
     try {
-      // Ganti URL ini kalau endpoint login Bapak beda
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`, {
         method: 'POST',
         headers: {

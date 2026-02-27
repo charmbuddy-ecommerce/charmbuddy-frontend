@@ -24,7 +24,7 @@ export default function RegisterPage() {
     register,
     handleSubmit,
     getValues,
-    formState: { errors, isSubmitting }, // isSubmitting ini otomatis menggantikan isLoading Bapak
+    formState: { errors, isSubmitting }, // isSubmitting ini otomatis menggantikan isLoading
   } = useForm<RegisterFormValues>();
 
   // 3. FUNGSI SUBMIT (Hanya jalan kalau validasi form sukses)
@@ -43,8 +43,6 @@ export default function RegisterPage() {
           email: data.email, 
           password: data.password, 
           name: data.username, 
-          // CATATAN LARAVEL: Biasanya Laravel minta namanya 'password_confirmation', bukan 'confirmPassword'
-          // Kalau API Laravel Bapak error validasi password, ganti kiri bawah ini jadi: password_confirmation: data.confirmPassword
           confirmPassword: data.confirmPassword 
         }),
       });
