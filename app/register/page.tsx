@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Mail, EyeOff, Eye, User } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 
 type RegisterFormValues = {
   username: string;
@@ -12,18 +13,62 @@ type RegisterFormValues = {
 };
 
 export default function RegisterPage() {
+  const router = useRouter();
+  
+  // 1. STATE UI SAJA (Inputan data sudah diurus useForm)
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
+  // 2. USEFORM WAJIB DI TOP LEVEL KOMPONEN
   const {
     register,
     handleSubmit,
     getValues,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting }, // isSubmitting ini otomatis menggantikan isLoading Bapak
   } = useForm<RegisterFormValues>();
 
-  const onSubmit = (data: RegisterFormValues) => {
-    console.log('Data yang akan dikirim ke API:', data);
-    alert('Registrasi berhasil!');
+  // 3. FUNGSI SUBMIT (Hanya jalan kalau validasi form sukses)
+  const onSubmit = async (data: RegisterFormValues) => {
+    setErrorMessage('');
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        // Ambil datanya langsung dari parameter 'data'
+        body: JSON.stringify({ 
+          email: data.email, 
+          password: data.password, 
+          name: data.username, 
+          // CATATAN LARAVEL: Biasanya Laravel minta namanya 'password_confirmation', bukan 'confirmPassword'
+          // Kalau API Laravel Bapak error validasi password, ganti kiri bawah ini jadi: password_confirmation: data.confirmPassword
+          confirmPassword: data.confirmPassword 
+        }),
+      });
+
+      const resData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(resData.message || 'Register gagal! Cek kembali data Anda.');
+      }
+      
+      if(resData.user) {
+        localStorage.setItem('user', JSON.stringify(resData.user));
+      }
+
+      alert('Register Berhasil!');
+      router.push('/login'); // Register sukses biasanya dilempar ke login dulu
+
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage((error as Error).message);
+      }
+    }
   };
 
   return (
@@ -34,6 +79,14 @@ export default function RegisterPage() {
           Register
         </h1>
 
+        {/* Nampilin Error dari API Laravel */}
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-500/80 text-white rounded-lg text-sm text-center backdrop-blur-sm">
+            {errorMessage}
+          </div>
+        )}
+
+        {/* Bungkus dengan handleSubmit bawaan useForm */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           
           {/* Input Username */}
@@ -103,7 +156,6 @@ export default function RegisterPage() {
               placeholder="Confirm Password"
               {...register("confirmPassword", { 
                 required: "Konfirmasi password wajib diisi",
-                // 2. Gunakan getValues("password") di dalam fungsi validate
                 validate: (value) => value === getValues("password") || "Password tidak cocok"
               })}
               className={`w-full pl-4 pr-12 py-3 rounded-lg focus:outline-none focus:ring-2 text-gray-800 bg-white placeholder-gray-500 ${
@@ -124,10 +176,10 @@ export default function RegisterPage() {
           <div className="flex justify-center pt-2">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="bg-white text-gray-800 font-semibold py-2 px-8 rounded-lg hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50"
+              disabled={isSubmitting} // isSubmitting otomatis true pas lagi loading fetch API
+              className="bg-white text-gray-800 font-semibold py-2 px-8 rounded-lg hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Loading...' : 'Register'}
+              {isSubmitting ? 'Memproses...' : 'Register'}
             </button>
           </div>
         </form>
