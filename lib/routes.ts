@@ -1,0 +1,17 @@
+export const routes = {
+  home: "/",
+  faq: "/faq",
+  catalogue: "/catalogue",
+  about: "/about",
+  search: "/search",
+  cart: "/cart",
+  checkout: "/checkout",
+  checkoutSuccess: "/checkout/success",
+  paymentMethod: "/payment-method",
+  statusOrder: "/status-order",
+  orderHistory: "/order-history",
+  profile: "/profile",
+  login: "/login",
+  register: "/register",
+  product: (slug: string) => `/product/${slug}`,
+} as const;
