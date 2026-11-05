@@ -2,26 +2,28 @@
 
 import { useState } from 'react';
 import { Mail, EyeOff, Eye } from 'lucide-react';
-import { useRouter } from 'next/navigation'; // Tambahan untuk redirect
+import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
-  
-  // State untuk nyimpen inputan
+
+  // State input
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
-  // State untuk status API
+
+  // State status API
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Fungsi buat nembak API Laravel
+  // Handle Login API
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setIsLoading(true);
     setErrorMessage('');
-    
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`, {
         method: 'POST',
@@ -35,26 +37,20 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        // Kalau dari Laravel ngasih response error (misal 401 Unauthorized)
         throw new Error(data.message || 'Login gagal! Cek email dan password Anda.');
       }
 
-      // KESUKSESAN LOGIN (Anggap Laravel ngirim token Auth Sanctum)
       // Simpan token ke Local Storage
-      localStorage.setItem('token', data.data.token);
-      
-      // Bisa juga nyimpen data usernya
-      if(data.data.user) {
+      if (data.data?.token) {
+        localStorage.setItem('token', data.data.token);
+      }
+      if (data.data?.user) {
         localStorage.setItem('user', JSON.stringify(data.data.user));
       }
 
       alert('Login Berhasil!');
-      
-      // Redirect ke halaman Homepage/Katalog
-      router.push('/'); 
-
+      router.push('/');
     } catch (error) {
-      // Kita "paksa" (cast) TypeScript untuk menganggap error ini pasti punya .message
       setErrorMessage((error as Error).message);
     } finally {
       setIsLoading(false);
@@ -62,70 +58,86 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e0f8f5] via-[#a3bded] to-[#6991c7]">
-      <div className="w-full max-w-md p-8 md:p-10 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4 overflow-hidden">
+      {/* Background Gradient Image from Figma */}
+      <Image
+        src="/images/login-bg.png"
+        alt="Login Background"
+        fill
+        className="object-cover -z-10"
+        priority
+      />
+
+      {/* Main Glassmorphic Card (Figma node #19:64) */}
+      <div className="w-full max-w-[788px] min-h-[473px] p-8 md:p-10 rounded-[20px] bg-white/15 border border-white/70 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] backdrop-blur-[6.9px] flex flex-col justify-between items-center my-8">
         
-        <h1 className="text-4xl text-white text-center mb-8 tracking-wide">
+        {/* Title matching Figma style_187eaaff: font-fanlste 64px white */}
+        <h1 className="font-fanlste text-5xl md:text-6xl text-white text-center mb-6 tracking-wide drop-shadow-sm">
           Login
         </h1>
 
-        {/* Nampilin Notif Error Kalau Gagal */}
+        {/* Error Notification */}
         {errorMessage && (
-          <div className="mb-4 p-3 bg-red-500/80 text-white rounded-lg text-sm text-center backdrop-blur-sm">
+          <div className="w-full max-w-[643px] mb-4 p-3 bg-red-500/80 text-white rounded-xl text-sm text-center backdrop-blur-sm shadow">
             {errorMessage}
           </div>
         )}
 
-        {/* Tambahin onSubmit di form */}
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div className="relative">
+        {/* Login Form */}
+        <form onSubmit={handleLogin} className="w-full max-w-[643px] flex flex-col items-center gap-5">
+          {/* Email Input */}
+          <div className="w-full h-[60px] px-5 bg-white rounded-2xl flex items-center justify-between shadow-sm focus-within:ring-2 focus-within:ring-white">
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)} // Nangkep ketikan
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
-              className="w-full pl-4 pr-12 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/70 text-gray-800 bg-white placeholder-gray-500"
+              className="w-full bg-transparent text-black font-satoshi text-lg md:text-2xl placeholder-gray-400 focus:outline-none"
               required
             />
-            <Mail className="absolute right-4 top-3.5 text-gray-700" size={20} />
+            <Mail className="text-black/80 shrink-0 ml-3" size={26} />
           </div>
 
-          <div className="relative">
+          {/* Password Input */}
+          <div className="w-full h-[60px] px-5 bg-white rounded-2xl flex items-center justify-between shadow-sm focus-within:ring-2 focus-within:ring-white">
             <input
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               value={password}
-              onChange={(e) => setPassword(e.target.value)} // Nangkep ketikan
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="w-full pl-4 pr-12 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/70 text-gray-800 bg-white placeholder-gray-500"
+              className="w-full bg-transparent text-black font-satoshi text-lg md:text-2xl placeholder-gray-400 focus:outline-none"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-3.5 text-gray-700 hover:text-black transition-colors"
+              className="text-black/80 hover:text-black transition-colors shrink-0 ml-3 cursor-pointer"
+              aria-label="Toggle Password Visibility"
             >
-              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+              {showPassword ? <Eye size={26} /> : <EyeOff size={26} />}
             </button>
           </div>
 
-          <div className="flex justify-center pt-2">
+          {/* Submit Button (Figma: width 91px, padding 8px 16px, borderRadius 10px, font 24px) */}
+          <div className="pt-2">
             <button
               type="submit"
-              disabled={isLoading} // Tombol mati pas lagi loading
-              className="bg-white text-gray-800 font-semibold py-2 px-8 rounded-lg hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading}
+              className="px-8 py-2 rounded-[10px] bg-white text-black font-satoshi text-xl md:text-2xl font-normal hover:bg-gray-100 transition-all duration-200 shadow hover:shadow-md cursor-pointer disabled:opacity-50"
             >
-              {isLoading ? 'Memproses...' : 'Login'}
+              {isLoading ? 'Loading...' : 'Login'}
             </button>
           </div>
         </form>
 
-        <div className="mt-8 flex justify-between items-center text-sm text-white/90">
-          <span>Don&apos;t Have an Account?</span>
-          <a href="/register" className="font-bold text-white hover:underline">
+        {/* Footer Link matching Figma node #19:62 */}
+        <div className="w-full max-w-[643px] flex items-center justify-between mt-8 text-base md:text-2xl font-satoshi text-white drop-shadow-sm">
+          <span className="font-normal">Dont Have an Account? </span>
+          <Link href="/register" className="font-bold underline hover:text-white/80 transition-colors">
             Register
-          </a>
+          </Link>
         </div>
-        
+
       </div>
     </div>
   );

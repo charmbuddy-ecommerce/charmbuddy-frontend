@@ -1,26 +1,81 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #E4EBFF;
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  --font-fanlste: var(--font-fanlste), cursive, serif;
+  --font-satoshi: var(--font-satoshi), sans-serif;
+  --color-primary-purple: #705CB2;
+  --color-primary-blue: #8798FF;
+  --color-brand-light: #F2FEEA;
+  --color-brand-lavender: #E5E4F2;
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-satoshi), sans-serif;
+  background-color: #E4EBFF;
+}
+
+/* Figma Background Gradient Styles */
+.bg-charmbuddy-subpage {
+  background: linear-gradient(180deg, #E4EBFF 0%, #D5E1FF 25%, #CCD7FF 55%, #9FB3FF 85%, #8798FF 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  position: relative;
+}
+
+.bg-charmbuddy-home {
+  background: linear-gradient(180deg, #B7C8FF 0%, #D2DEFF 12%, #E9EEFF 24%, #F6F8FF 42%, #F6F8FF 58%, #E4EBFF 72%, #B5C6FF 88%, #8798FF 100%);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Figma Noise Texture Overlay */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/noise.png');
+  background-repeat: repeat;
+  background-size: 400px 400px;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glassmorphism helpers matching Figma styles */
+.glass-header {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0px 4px 16px rgba(112, 92, 178, 0.08);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0px 8px 30px rgba(112, 92, 178, 0.08);
+}
+
+.glass-card-purple {
+  background: rgba(112, 92, 178, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.font-fanlste {
+  font-family: var(--font-fanlste), cursive, serif;
+}
+
+.font-satoshi {
+  font-family: var(--font-satoshi), sans-serif;
 }

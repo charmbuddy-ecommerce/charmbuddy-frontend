@@ -51,7 +51,7 @@ export default function RootLayout({
       {/* 1. satoshi.className -> Menjadikan Satoshi font default website.
          2. fanlste.variable -> Mendaftarkan variabel CSS --font-fanlste agar bisa dibaca Tailwind.
       */}
-      <body className={`${satoshi.className} ${fanlste.variable} antialiased`}>
+      <body className={`${satoshi.className} ${satoshi.variable} ${fanlste.variable} antialiased`}>
         {children}
       </body>
     </html>

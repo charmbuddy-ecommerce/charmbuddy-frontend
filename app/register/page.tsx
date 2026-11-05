@@ -1,9 +1,11 @@
-'use client'; 
+'use client';
 
 import { useState } from 'react';
 import { Mail, EyeOff, Eye, User } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 
 type RegisterFormValues = {
   username: string;
@@ -14,20 +16,20 @@ type RegisterFormValues = {
 
 export default function RegisterPage() {
   const router = useRouter();
-  
-  // 1. STATE UI SAJA (Inputan data sudah diurus useForm)
+
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // 2. USEFORM WAJIB DI TOP LEVEL KOMPONEN
   const {
     register,
     handleSubmit,
-    getValues,
-    formState: { errors, isSubmitting }, // isSubmitting ini otomatis menggantikan isLoading
+    watch,
+    formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>();
 
-  // 3. FUNGSI SUBMIT (Hanya jalan kalau validasi form sukses)
+  const passwordValue = watch('password');
+
   const onSubmit = async (data: RegisterFormValues) => {
     setErrorMessage('');
 
@@ -38,12 +40,11 @@ export default function RegisterPage() {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        // Ambil datanya langsung dari parameter 'data'
-        body: JSON.stringify({ 
-          email: data.email, 
-          password: data.password, 
-          name: data.username, 
-          confirmPassword: data.confirmPassword 
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          name: data.username,
+          confirmPassword: data.confirmPassword,
         }),
       });
 
@@ -52,144 +53,168 @@ export default function RegisterPage() {
       if (!response.ok) {
         throw new Error(resData.message || 'Register gagal! Cek kembali data Anda.');
       }
-      
-      if(resData.user) {
+
+      if (resData.user) {
         localStorage.setItem('user', JSON.stringify(resData.user));
       }
 
-      alert('Register Berhasil!');
-      router.push('/login'); // Register sukses biasanya dilempar ke login dulu
-
+      alert('Register Berhasil! Silakan Login.');
+      router.push('/login');
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage((error as Error).message);
-      }
+      setErrorMessage((error as Error).message);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#e0f8f5] via-[#a3bded] to-[#6991c7]">
-      <div className="w-full max-w-md p-8 md:p-10 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4 overflow-hidden">
+      {/* Background Gradient Image from Figma */}
+      <Image
+        src="/images/register-bg.png"
+        alt="Register Background"
+        fill
+        className="object-cover -z-10"
+        priority
+      />
+
+      {/* Main Glassmorphic Card (Figma node #107:89) */}
+      <div className="w-full max-w-[788px] min-h-[649px] p-8 md:p-10 rounded-[20px] bg-white/15 border border-white/70 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] backdrop-blur-[6.9px] flex flex-col justify-between items-center my-8">
         
-        <h1 className="text-4xl text-white text-center mb-8 tracking-wide">
+        {/* Title matching Figma style_187eaaff: font-fanlste 64px white */}
+        <h1 className="font-fanlste text-5xl md:text-6xl text-white text-center mb-6 tracking-wide drop-shadow-sm">
           Register
         </h1>
 
-        {/* Nampilin Error dari API Laravel */}
+        {/* Error Notification */}
         {errorMessage && (
-          <div className="mb-4 p-3 bg-red-500/80 text-white rounded-lg text-sm text-center backdrop-blur-sm">
+          <div className="w-full max-w-[643px] mb-4 p-3 bg-red-500/80 text-white rounded-xl text-sm text-center backdrop-blur-sm shadow">
             {errorMessage}
           </div>
         )}
 
-        {/* Bungkus dengan handleSubmit bawaan useForm */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Register Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-[643px] flex flex-col items-center gap-4">
           
-          {/* Input Username */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Name"
-              {...register("username", { 
-                required: "Nama wajib diisi",
-                minLength: { value: 3, message: "Nama minimal 3 karakter" } 
-              })}
-              className={`w-full pl-4 pr-12 py-3 rounded-lg focus:outline-none focus:ring-2 text-gray-800 bg-white placeholder-gray-500 ${
-                errors.username ? 'ring-2 ring-red-400 border-red-400' : 'focus:ring-white/70'
-              }`}
-            />
-            <User className="absolute right-4 top-3.5 text-gray-700" size={20} />
-            {errors.username && <p className="text-red-200 text-xs font-semibold mt-1">{errors.username.message}</p>}
+          {/* Name Input */}
+          <div className="w-full">
+            <div className={`w-full h-[60px] px-5 bg-white rounded-2xl flex items-center justify-between shadow-sm focus-within:ring-2 ${
+              errors.username ? 'ring-2 ring-red-400' : 'focus-within:ring-white'
+            }`}>
+              <input
+                type="text"
+                placeholder="Name"
+                {...register('username', {
+                  required: 'Nama wajib diisi',
+                  minLength: { value: 3, message: 'Nama minimal 3 karakter' },
+                })}
+                className="w-full bg-transparent text-black font-satoshi text-lg md:text-2xl placeholder-gray-400 focus:outline-none"
+              />
+              <User className="text-black/80 shrink-0 ml-3" size={26} />
+            </div>
+            {errors.username && (
+              <p className="text-red-200 text-xs mt-1 ml-2">{errors.username.message}</p>
+            )}
           </div>
 
-          {/* Input Email */}
-          <div className="relative">
-            <input
-              type="email"
-              placeholder="Email"
-              {...register("email", { 
-                required: "Email wajib diisi",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Format email tidak valid"
-                }
-              })}
-              className={`w-full pl-4 pr-12 py-3 rounded-lg focus:outline-none focus:ring-2 text-gray-800 bg-white placeholder-gray-500 ${
-                errors.email ? 'ring-2 ring-red-400 border-red-400' : 'focus:ring-white/70'
-              }`}
-            />
-            <Mail className="absolute right-4 top-3.5 text-gray-700" size={20} />
-            {errors.email && <p className="text-red-200 text-xs font-semibold mt-1">{errors.email.message}</p>}
+          {/* Email Input */}
+          <div className="w-full">
+            <div className={`w-full h-[60px] px-5 bg-white rounded-2xl flex items-center justify-between shadow-sm focus-within:ring-2 ${
+              errors.email ? 'ring-2 ring-red-400' : 'focus-within:ring-white'
+            }`}>
+              <input
+                type="email"
+                placeholder="Email"
+                {...register('email', {
+                  required: 'Email wajib diisi',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Format email tidak valid',
+                  },
+                })}
+                className="w-full bg-transparent text-black font-satoshi text-lg md:text-2xl placeholder-gray-400 focus:outline-none"
+              />
+              <Mail className="text-black/80 shrink-0 ml-3" size={26} />
+            </div>
+            {errors.email && (
+              <p className="text-red-200 text-xs mt-1 ml-2">{errors.email.message}</p>
+            )}
           </div>
 
-          {/* Input Password */}
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              {...register("password", { 
-                required: "Password wajib diisi",
-                minLength: { value: 6, message: "Password minimal 6 karakter" }
-              })}
-              className={`w-full pl-4 pr-12 py-3 rounded-lg focus:outline-none focus:ring-2 text-gray-800 bg-white placeholder-gray-500 ${
-                errors.password ? 'ring-2 ring-red-400 border-red-400' : 'focus:ring-white/70'
-              }`}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-3.5 text-gray-700 hover:text-black transition-colors"
-            >
-              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-            </button>
-            {errors.password && <p className="text-red-200 text-xs font-semibold mt-1">{errors.password.message}</p>}
+          {/* Password Input */}
+          <div className="w-full">
+            <div className={`w-full h-[60px] px-5 bg-white rounded-2xl flex items-center justify-between shadow-sm focus-within:ring-2 ${
+              errors.password ? 'ring-2 ring-red-400' : 'focus-within:ring-white'
+            }`}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                {...register('password', {
+                  required: 'Password wajib diisi',
+                  minLength: { value: 6, message: 'Password minimal 6 karakter' },
+                })}
+                className="w-full bg-transparent text-black font-satoshi text-lg md:text-2xl placeholder-gray-400 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-black/80 hover:text-black transition-colors shrink-0 ml-3 cursor-pointer"
+                aria-label="Toggle Password Visibility"
+              >
+                {showPassword ? <Eye size={26} /> : <EyeOff size={26} />}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="text-red-200 text-xs mt-1 ml-2">{errors.password.message}</p>
+            )}
           </div>
 
-          {/* Input Confirm Password */}
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Confirm Password"
-              {...register("confirmPassword", { 
-                required: "Konfirmasi password wajib diisi",
-                validate: (value) => value === getValues("password") || "Password tidak cocok"
-              })}
-              className={`w-full pl-4 pr-12 py-3 rounded-lg focus:outline-none focus:ring-2 text-gray-800 bg-white placeholder-gray-500 ${
-                errors.confirmPassword ? 'ring-2 ring-red-400 border-red-400' : 'focus:ring-white/70'
-              }`}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-3.5 text-gray-700 hover:text-black transition-colors"
-            >
-              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-            </button>
-            {errors.confirmPassword && <p className="text-red-200 text-xs font-semibold mt-1">{errors.confirmPassword.message}</p>}
+          {/* Confirm Password Input */}
+          <div className="w-full">
+            <div className={`w-full h-[60px] px-5 bg-white rounded-2xl flex items-center justify-between shadow-sm focus-within:ring-2 ${
+              errors.confirmPassword ? 'ring-2 ring-red-400' : 'focus-within:ring-white'
+            }`}>
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Confirm Password"
+                {...register('confirmPassword', {
+                  required: 'Konfirmasi password wajib diisi',
+                  validate: (value) => value === passwordValue || 'Password tidak cocok',
+                })}
+                className="w-full bg-transparent text-black font-satoshi text-lg md:text-2xl placeholder-gray-400 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="text-black/80 hover:text-black transition-colors shrink-0 ml-3 cursor-pointer"
+                aria-label="Toggle Confirm Password Visibility"
+              >
+                {showConfirmPassword ? <Eye size={26} /> : <EyeOff size={26} />}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="text-red-200 text-xs mt-1 ml-2">{errors.confirmPassword.message}</p>
+            )}
           </div>
 
-          {/* Button Register */}
-          <div className="flex justify-center pt-2">
+          {/* Submit Button (Figma: width 110px, padding 8px 16px, borderRadius 10px, font 24px) */}
+          <div className="pt-2">
             <button
               type="submit"
-              disabled={isSubmitting} // isSubmitting otomatis true pas lagi loading fetch API
-              className="bg-white text-gray-800 font-semibold py-2 px-8 rounded-lg hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting}
+              className="px-8 py-2 rounded-[10px] bg-white text-black font-satoshi text-xl md:text-2xl font-normal hover:bg-gray-100 transition-all duration-200 shadow hover:shadow-md cursor-pointer disabled:opacity-50"
             >
-              {isSubmitting ? 'Memproses...' : 'Register'}
+              {isSubmitting ? 'Loading...' : 'Register'}
             </button>
           </div>
         </form>
 
-        {/* Footer Link */}
-        <div className="mt-8 flex justify-between items-center text-sm text-white/90">
-          <span>Already Have an Account?</span>
-          <a href="/login" className="font-bold text-white hover:underline">
+        {/* Footer Link matching Figma */}
+        <div className="w-full max-w-[643px] flex items-center justify-between mt-6 text-base md:text-2xl font-satoshi text-white drop-shadow-sm">
+          <span className="font-normal">Already Have an Account?</span>
+          <Link href="/login" className="font-bold underline hover:text-white/80 transition-colors">
             Login
-          </a>
+          </Link>
         </div>
-        
+
       </div>
     </div>
   );
